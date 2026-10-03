@@ -67,3 +67,5 @@ export const getUnreadCount = async () => {
     (session?.code === 0 ? session.data.follow_unread ?? 0 : 0)
   )
 }
+
+export { getNotifyCount as getFeedsUpdateCount } from '@/components/feeds/notify'

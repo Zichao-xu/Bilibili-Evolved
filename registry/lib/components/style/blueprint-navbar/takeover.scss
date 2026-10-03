@@ -1,0 +1,7 @@
+// 隐藏原版顶栏与自定义顶栏; 原版顶栏外层 64px 的占位保留, 页面排版不变, 图纸顶栏固定覆盖在同一位置
+.bili-header__bar,
+.bili-header .mini-header,
+.custom-navbar {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
