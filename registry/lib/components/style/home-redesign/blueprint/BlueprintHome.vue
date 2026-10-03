@@ -1,101 +1,80 @@
 <template>
-  <HomeRedesignBase>
-    <div class="blueprint-home">
-      <div class="bp-watermark" aria-hidden="true">
-        <VIcon icon="logo" :size="380" />
-      </div>
-      <div class="bp-block">
-        <i class="bp-crop tl" aria-hidden="true"></i>
-        <i class="bp-crop tr" aria-hidden="true"></i>
-        <i class="bp-crop bl" aria-hidden="true"></i>
-        <i class="bp-crop br" aria-hidden="true"></i>
-        <div class="bp-meta bp-in" style="--bp-delay: 0ms">
-          <span><b class="bp-mark"></b>01 — QUERY</span>
-          <span>ENTER ↵</span>
-        </div>
-        <div class="bp-field bp-in" style="--bp-delay: 35ms">
-          <LaunchBar />
-        </div>
-        <div class="bp-meta bp-in" style="--bp-delay: 70ms">
-          <span class="bp-ruler" aria-hidden="true"></span>
-          <span>{{ clock }}</span>
-        </div>
-      </div>
-      <div class="bp-sheet bp-in" style="--bp-delay: 105ms">
-        <span>BILIBILI / SEARCH — SHEET 01</span>
-        <span>REV. {{ revision }}</span>
-      </div>
+  <div class="bp-root">
+    <div class="bp-watermark" aria-hidden="true">
+      <VIcon icon="logo" :size="380" />
     </div>
-  </HomeRedesignBase>
+    <BlueprintHeader class="bp-in" style="--bp-delay: 0ms" />
+    <main class="bp-main">
+      <SearchConsole />
+    </main>
+    <footer class="bp-sheet bp-in" style="--bp-delay: 150ms">
+      <span>BILIBILI / INDEX — SHEET 01</span>
+      <span>REV. {{ revision }}</span>
+    </footer>
+  </div>
 </template>
 <script lang="ts">
-import LaunchBar from '@/components/launch-bar/LaunchBar.vue'
 import { VIcon } from '@/ui'
-import HomeRedesignBase from '../HomeRedesignBase.vue'
-import { setupLongPressDelete } from './long-press-delete'
-
-const pad = (value: number) => value.toString().padStart(2, '0')
-const formatClock = (date: Date) =>
-  `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}  ${pad(
-    date.getHours(),
-  )}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+import BlueprintHeader from './BlueprintHeader.vue'
+import SearchConsole from './SearchConsole.vue'
 
 export default Vue.extend({
   components: {
-    HomeRedesignBase,
-    LaunchBar,
     VIcon,
+    BlueprintHeader,
+    SearchConsole,
   },
   data() {
     const now = new Date()
     return {
-      clock: formatClock(now),
-      revision: `${now.getFullYear()}.${pad(now.getMonth() + 1)}`,
-      timer: 0,
-      disposeLongPress: (() => undefined) as () => void,
+      revision: `${now.getFullYear()}.${(now.getMonth() + 1).toString().padStart(2, '0')}`,
     }
-  },
-  mounted() {
-    this.timer = window.setInterval(() => {
-      this.clock = formatClock(new Date())
-    }, 1000)
-    this.disposeLongPress = setupLongPressDelete(this.$el as HTMLElement)
-  },
-  beforeDestroy() {
-    window.clearInterval(this.timer)
-    this.disposeLongPress()
   },
 })
 </script>
 <style lang="scss">
-@import 'common';
+.bp-root {
+  // 纸面 (浅色) / 底片 (深色), 跟随系统外观
+  --bp-bg: #f2f2ef;
+  --bp-surface: #f7f7f4;
+  --bp-ink: #161616;
+  --bp-dim: #6e6e6b;
+  --bp-faint: #c2c2bc;
+  --bp-line: rgba(0, 0, 0, 0.045);
+  --bp-line-major: rgba(0, 0, 0, 0.085);
+  --bp-watermark: rgba(0, 0, 0, 0.022);
+  --bp-border: #8f8f8a;
+  --bp-hover: rgba(0, 0, 0, 0.045);
+  --bp-accent: #002fa7;
+  --bp-sans: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  --bp-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --bp-gutter: 32px;
+  --bp-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --bp-exit: cubic-bezier(0.4, 0, 1, 1);
 
-html:has(body:not(.home-redesign-off) .blueprint-home),
-body:not(.home-redesign-off):has(.blueprint-home) {
-  height: 100%;
-  overflow: hidden;
-}
+  @media (prefers-color-scheme: dark) {
+    --bp-bg: #070707;
+    --bp-surface: #0b0b0b;
+    --bp-ink: #e6e6e6;
+    --bp-dim: #707070;
+    --bp-faint: #353535;
+    --bp-line: rgba(255, 255, 255, 0.045);
+    --bp-line-major: rgba(255, 255, 255, 0.085);
+    --bp-watermark: rgba(255, 255, 255, 0.028);
+    --bp-border: #8a8a8a;
+    --bp-hover: rgba(255, 255, 255, 0.06);
+  }
 
-.home-redesign-base:has(.blueprint-home) {
   position: fixed;
   inset: 0;
-  z-index: 0;
-  width: 100%;
-  min-height: 0 !important;
-  background-color: transparent !important;
-  @include v-stretch();
-}
-
-// 配色变量定义在 blueprint-chrome.scss, 跟随系统深浅色
-.blueprint-home {
-  --bp-chamfer: 12px;
-
-  position: relative;
-  flex: 1 1 auto;
-  width: 100%;
-  height: 100%;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   color: var(--bp-ink);
+  font-family: var(--bp-sans);
+  font-size: 14px;
+  line-height: 1.5;
   background-color: var(--bp-bg);
   background-image: linear-gradient(var(--bp-line-major) 1px, transparent 1px),
     linear-gradient(90deg, var(--bp-line-major) 1px, transparent 1px),
@@ -103,9 +82,31 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     linear-gradient(90deg, var(--bp-line) 1px, transparent 1px);
   background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
   background-position: center center;
-  @include v-center();
-  justify-content: center;
+  -webkit-font-smoothing: antialiased;
 
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  :focus-visible {
+    outline: 1px solid var(--bp-accent);
+    outline-offset: 2px;
+  }
+
+  // ---------- 骨架 ----------
   .bp-watermark {
     position: absolute;
     left: 50%;
@@ -115,22 +116,168 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     pointer-events: none;
     user-select: none;
   }
-
-  .bp-block {
+  .bp-main {
     position: relative;
-    width: min(640px, 88vw);
-    padding: 28px 32px;
-    @include v-stretch();
-    gap: 10px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bp-sheet {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 var(--bp-gutter) 24px;
+    font-family: var(--bp-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--bp-dim);
   }
 
+  // ---------- 顶栏 ----------
+  .bp-head {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 var(--bp-gutter);
+  }
+  .bp-logo {
+    display: flex;
+    color: var(--bp-ink);
+    // logo 字形宽约为字号的 2.2 倍, 图标框改为随字形自适应, 否则会溢出边距
+    .be-icon {
+      width: auto !important;
+    }
+    transition: opacity 0.2s ease-out;
+    &:hover {
+      opacity: 0.7;
+    }
+  }
+  .bp-user {
+    position: relative;
+  }
+  .bp-avatar {
+    position: relative;
+    display: block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--bp-bg), 0 0 0 3px var(--bp-faint);
+    transition: box-shadow 0.2s ease-out;
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: block;
+    }
+    &:hover,
+    &[aria-expanded='true'] {
+      box-shadow: 0 0 0 2px var(--bp-bg), 0 0 0 3px var(--bp-ink);
+    }
+  }
+  .bp-unread {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 7px;
+    height: 7px;
+    background-color: var(--bp-accent);
+    box-shadow: 0 0 0 2px var(--bp-bg);
+  }
+  .bp-login {
+    font-family: var(--bp-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--bp-dim);
+    &:hover {
+      color: var(--bp-ink);
+    }
+  }
+  .bp-menu {
+    position: absolute;
+    top: calc(100% + 14px);
+    right: 0;
+    width: 220px;
+    border: 1px solid var(--bp-faint);
+    background-color: var(--bp-surface);
+    transform-origin: top right;
+  }
+  .bp-menu-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--bp-faint);
+    font-family: var(--bp-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--bp-dim);
+    span:first-child {
+      color: var(--bp-ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+  .bp-menu-item {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 9px 14px;
+    transition: background-color 0.15s ease-out;
+    & + & {
+      border-top: 1px solid var(--bp-line-major);
+    }
+    &:hover {
+      background-color: var(--bp-hover);
+    }
+  }
+  .bp-menu-index {
+    font-family: var(--bp-mono);
+    font-size: 11px;
+    color: var(--bp-dim);
+  }
+  .bp-menu-name {
+    flex: 1;
+  }
+  .bp-menu-count {
+    min-width: 18px;
+    padding: 0 5px;
+    font-family: var(--bp-mono);
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+    color: #fff;
+    background-color: var(--bp-accent);
+  }
+  .bp-menu-enter-active {
+    transition: opacity 0.18s ease-out, transform 0.32s var(--bp-spring);
+  }
+  .bp-menu-leave-active {
+    transition: opacity 0.12s var(--bp-exit), transform 0.12s var(--bp-exit);
+  }
+  .bp-menu-enter,
+  .bp-menu-leave-to {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  // ---------- 搜索控制台 ----------
+  .bp-console {
+    position: relative;
+    width: min(640px, calc(100vw - 2 * var(--bp-gutter)));
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
   .bp-crop {
     position: absolute;
     width: 14px;
     height: 14px;
-    border-color: var(--bp-faint);
-    border-style: solid;
-    border-width: 0;
+    border: 0 solid var(--bp-faint);
     &.tl {
       top: 0;
       left: 0;
@@ -156,19 +303,22 @@ body:not(.home-redesign-off):has(.blueprint-home) {
       border-right-width: 1px;
     }
   }
-
   .bp-meta,
-  .bp-sheet {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  .bp-panel-head,
+  .bp-panel-foot,
+  .bp-empty,
+  .bp-text-button {
     font-family: var(--bp-mono);
     font-size: 11px;
     letter-spacing: 0.08em;
     color: var(--bp-dim);
+  }
+  .bp-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     white-space: pre;
   }
-
   .bp-mark {
     display: inline-block;
     width: 6px;
@@ -177,7 +327,6 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     vertical-align: 1px;
     background-color: var(--bp-accent);
   }
-
   .bp-ruler {
     flex: 0 0 220px;
     height: 7px;
@@ -187,10 +336,13 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     background-repeat: repeat-x;
   }
 
-  // 切角用伪元素画, 不用 clip-path, 否则会把下拉建议一起裁掉
+  // 斜切角用伪元素绘制
   .bp-field {
+    --bp-chamfer: 12px;
     --bp-field-border: var(--bp-border);
     position: relative;
+    display: flex;
+    align-items: center;
     border: 1px solid var(--bp-field-border);
     background-color: var(--bp-bg);
     transition: border-color 0.2s ease-out;
@@ -213,181 +365,153 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     &:focus-within {
       --bp-field-border: var(--bp-ink);
     }
-
-    .launch-bar {
-      --color: var(--bp-ink);
-      font-size: 16px;
-      padding: 10px 14px;
-
-      .input-area .launch-bar-form .input {
-        width: 100%;
-        caret-color: var(--bp-accent);
-        &::placeholder {
-          color: var(--bp-dim) !important;
-        }
-      }
-      .submit {
-        color: var(--bp-dim);
-      }
-    }
   }
-
-  // 候选词 / 搜索历史: 标签块平铺, 去掉逐行重复的图标
-  .launch-bar-suggest-list {
-    // 让出下方刻度尺与时钟那一行
-    top: calc(100% + 36px);
-    border-radius: 0;
-    border: 1px solid var(--bp-faint);
-    box-shadow: none;
+  .bp-input {
+    flex: 1;
+    min-width: 0;
+    height: 48px;
+    padding: 0 16px;
+    border: none;
+    outline: none !important;
+    background: transparent;
     color: var(--bp-ink);
-    background-color: var(--bp-bg);
-    white-space: normal;
-    font-size: 13px;
-
-    .launch-bar-history-list,
-    .launch-bar-action-list {
-      position: relative;
-      display: flex;
-      flex-wrap: wrap;
-      align-content: flex-start;
-      gap: 8px;
-      padding: 38px 14px 14px;
-      &::before {
-        position: absolute;
-        top: 14px;
-        left: 14px;
-        font-family: var(--bp-mono);
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        color: var(--bp-dim);
-      }
-    }
-    .launch-bar-history-list::before {
-      content: '02 — HISTORY';
-    }
-    .launch-bar-action-list::before {
-      content: '02 — SUGGEST';
-    }
-
-    .be-launch-bar-suggest-item {
-      position: relative;
-      max-width: 100%;
-      padding: 6px 11px !important;
-      border: 1px solid var(--bp-faint);
-      border-radius: 0 !important;
-      transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
-      &-content {
-        gap: 0;
-      }
-      &-icon,
-      &-description {
-        display: none;
-      }
-      &-title {
-        flex: none;
-        width: auto;
-      }
-      // 不显示删除按钮, 改为长按删除 (long-press-delete.ts)
-      &-delete {
-        display: none !important;
-      }
-      user-select: none;
-      overflow: hidden;
-      // 长按进度: 底部墨线从左向右生长, 时长与 holdDuration 一致
-      &::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 2px;
-        background-color: var(--bp-ink);
-        transform: scaleX(0);
-        transform-origin: left center;
-        transition: transform 0.18s ease-out;
-        pointer-events: none;
-      }
-      &.bp-holding::after {
-        transform: scaleX(1);
-        transition: transform 0.55s cubic-bezier(0.4, 0, 0.6, 1);
-      }
-      &.bp-holding {
-        border-color: var(--bp-ink);
-      }
-      // 退场: 加速收缩淡出
-      &.bp-removing {
-        pointer-events: none;
-        animation: bp-chip-exit 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
-      }
-      &:not(.disabled):hover,
-      &:not(.disabled).focused,
-      &:not(.disabled):focus-within {
-        border-color: var(--bp-ink);
-        background-color: var(--bp-hover);
-      }
-      &.disabled {
-        border: none;
-        padding: 0 !important;
-        color: var(--bp-dim);
-      }
-    }
-
-    // 历史列表最后一项是「清除搜索历史」, 放到标题行右侧
-    .launch-bar-history-list .be-launch-bar-suggest-item:last-child:not(.disabled) {
-      position: absolute;
-      top: 10px;
-      right: 14px;
-      padding: 2px 0 !important;
-      border: none;
-      background: none !important;
+    font: 16px var(--bp-sans);
+    caret-color: var(--bp-accent);
+    &::placeholder {
       color: var(--bp-dim);
-      font-family: var(--bp-mono);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      .be-launch-bar-suggest-item-name {
-        font-size: 0;
-        &::after {
-          content: 'CLEAR ALL';
-          font-size: 11px;
-        }
-      }
-      &:hover {
-        color: var(--bp-ink);
-      }
-    }
-
-    .suggest-highlight {
-      color: inherit;
-      text-decoration: underline 2px var(--bp-accent);
-      text-underline-offset: 3px;
     }
   }
-
-  .bp-sheet {
-    position: absolute;
-    left: var(--bp-gutter);
-    right: var(--bp-gutter);
-    bottom: 24px;
+  .bp-submit {
+    display: flex;
+    padding: 0 16px;
+    height: 48px;
+    align-items: center;
     color: var(--bp-dim);
-    opacity: 0.7;
+    transition: color 0.15s ease-out;
+    &:hover {
+      color: var(--bp-ink);
+    }
   }
 
+  // ---------- 候选面板 ----------
+  .bp-panel {
+    position: absolute;
+    top: calc(100% - 18px);
+    left: 32px;
+    right: 32px;
+    z-index: 1;
+    border: 1px solid var(--bp-faint);
+    background-color: var(--bp-surface);
+    padding: 12px 14px 14px;
+    transform-origin: top center;
+  }
+  .bp-panel-enter-active {
+    transition: opacity 0.18s ease-out, transform 0.34s var(--bp-spring);
+  }
+  .bp-panel-leave-active {
+    transition: opacity 0.12s var(--bp-exit), transform 0.12s var(--bp-exit);
+  }
+  .bp-panel-enter,
+  .bp-panel-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  .bp-panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .bp-text-button:hover {
+    color: var(--bp-ink);
+  }
+  .bp-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .bp-chip {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 5px 11px;
+    border: 1px solid var(--bp-faint) !important;
+    font-size: 13px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    user-select: none;
+    touch-action: none;
+    animation: bp-chip-in 0.36s var(--bp-spring) both;
+    animation-delay: calc(var(--i) * 16ms);
+    transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
+    &:hover,
+    &.active,
+    &.holding {
+      border-color: var(--bp-ink) !important;
+      background-color: var(--bp-hover);
+    }
+    // 长按进度: 底部墨线生长
+    &::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--bp-ink);
+      transform: scaleX(0);
+      transform-origin: left center;
+      transition: transform 0.18s ease-out;
+    }
+    &.holding::after {
+      transform: scaleX(1);
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.6, 1);
+    }
+    &.removing {
+      pointer-events: none;
+      animation: bp-chip-out 0.2s var(--bp-exit) forwards;
+    }
+  }
+  .bp-hit {
+    text-decoration: underline 2px var(--bp-accent);
+    text-underline-offset: 3px;
+  }
+  // 退场动画由 .removing 播放, 移除时不再走过渡, 避免已淡出的标签闪回
+  .bp-chip-leave-active {
+    display: none;
+    animation: none !important;
+    transition: none !important;
+  }
+  // 删除后其余标签弹性补位
+  .bp-chip-move {
+    transition: transform 0.34s var(--bp-spring);
+  }
+  .bp-empty {
+    padding: 4px 0;
+  }
+  .bp-panel-foot {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--bp-line-major);
+    opacity: 0.8;
+  }
+
+  // ---------- 进场 ----------
   .bp-in {
-    animation: bp-enter 0.52s cubic-bezier(0.34, 1.32, 0.64, 1) both;
+    animation: bp-enter 0.52s var(--bp-spring) both;
     animation-delay: var(--bp-delay, 0ms);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .bp-in {
-      animation: none;
+    .bp-in,
+    .bp-chip {
+      animation: none !important;
     }
-  }
-}
-
-@keyframes bp-chip-exit {
-  to {
-    opacity: 0;
-    transform: scale(0.86);
+    .bp-chip-move,
+    .bp-panel-enter-active,
+    .bp-menu-enter-active {
+      transition: none;
+    }
   }
 }
 
@@ -396,9 +520,17 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     opacity: 0;
     transform: translateY(8px);
   }
+}
+@keyframes bp-chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@keyframes bp-chip-out {
   to {
-    opacity: 1;
-    transform: none;
+    opacity: 0;
+    transform: scale(0.86);
   }
 }
 </style>

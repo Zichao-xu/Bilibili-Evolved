@@ -1,0 +1,26 @@
+// 首页由 BlueprintHome 整页接管: 隐藏原页面与顶栏, 首帧即生效避免闪出原首页
+html,
+body {
+  background-color: #f2f2ef !important;
+  @media (prefers-color-scheme: dark) {
+    background-color: #070707 !important;
+  }
+}
+
+body:not(.home-redesign-off) {
+  overflow: hidden !important;
+
+  > #i_cecream,
+  > #app,
+  > .custom-navbar,
+  > .bili-header,
+  > #biliMainFooter,
+  > .adblock-tips,
+  .palette-button-wrap {
+    display: none !important;
+  }
+}
+
+body.home-redesign-off .bp-root {
+  display: none;
+}
