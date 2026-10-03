@@ -1,8 +1,11 @@
 <template>
   <header class="bp-head">
-    <a class="bp-logo" href="https://www.bilibili.com/" aria-label="bilibili 首页">
-      <VIcon icon="logo" :size="38" />
-    </a>
+    <nav class="bp-nav">
+      <a class="bp-logo" href="https://www.bilibili.com/" aria-label="bilibili 首页">
+        <VIcon icon="logo" :size="38" />
+      </a>
+      <a class="bp-nav-link" href="https://t.bilibili.com/">动态</a>
+    </nav>
     <div v-if="user && user.isLogin" ref="user" class="bp-user">
       <button
         class="bp-avatar"

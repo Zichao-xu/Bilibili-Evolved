@@ -155,6 +155,19 @@ export default Vue.extend({
       opacity: 0.7;
     }
   }
+  .bp-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .bp-nav-link {
+    font-size: 14px;
+    color: var(--bp-dim);
+    transition: color 0.15s ease-out;
+    &:hover {
+      color: var(--bp-ink);
+    }
+  }
   .bp-user {
     position: relative;
   }
