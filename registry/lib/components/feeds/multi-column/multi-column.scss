@@ -1,8 +1,10 @@
-// 动态首页的动态列表按行排成多列, 保持从左到右的时间顺序
+// 动态首页的动态列表排成多列瀑布流, 每张卡片的行数由 layout.ts 按高度计算
 .bili-dyn-home--member .bili-dyn-list__items {
   display: grid !important;
   grid-template-columns: repeat(var(--be-feeds-column-count, 2), minmax(0, 1fr));
-  gap: 12px;
+  grid-auto-rows: 1px;
+  column-gap: 12px;
+  row-gap: 0;
   align-items: start;
   > .bili-dyn-list__item {
     min-width: 0;
