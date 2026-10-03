@@ -82,14 +82,8 @@ body:not(.home-redesign-off):has(.blueprint-home) {
   @include v-stretch();
 }
 
+// 配色变量定义在 blueprint-chrome.scss, 跟随系统深浅色
 .blueprint-home {
-  --bp-ink: #e6e6e6;
-  --bp-dim: #6b6b6b;
-  --bp-faint: #3a3a3a;
-  --bp-line: rgba(255, 255, 255, 0.045);
-  --bp-line-major: rgba(255, 255, 255, 0.085);
-  --bp-accent: #002fa7;
-  --bp-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --bp-chamfer: 12px;
 
   position: relative;
@@ -98,7 +92,7 @@ body:not(.home-redesign-off):has(.blueprint-home) {
   height: 100%;
   overflow: hidden;
   color: var(--bp-ink);
-  background-color: #070707;
+  background-color: var(--bp-bg);
   background-image: linear-gradient(var(--bp-line-major) 1px, transparent 1px),
     linear-gradient(90deg, var(--bp-line-major) 1px, transparent 1px),
     linear-gradient(var(--bp-line) 1px, transparent 1px),
@@ -113,7 +107,7 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -54%);
-    color: rgba(255, 255, 255, 0.028);
+    color: var(--bp-watermark);
     pointer-events: none;
     user-select: none;
   }
@@ -187,15 +181,14 @@ body:not(.home-redesign-off):has(.blueprint-home) {
       linear-gradient(90deg, var(--bp-dim) 1px, transparent 1px);
     background-size: 11px 4px, 55px 7px;
     background-repeat: repeat-x;
-    background-position: left top, left top;
   }
 
-  // 切角用伪元素画, 不用 clip-path, 否则会把下拉建议列表一起裁掉
+  // 切角用伪元素画, 不用 clip-path, 否则会把下拉建议一起裁掉
   .bp-field {
-    --bp-border: #8a8a8a;
+    --bp-field-border: var(--bp-border);
     position: relative;
-    border: 1px solid var(--bp-border);
-    background-color: #070707;
+    border: 1px solid var(--bp-field-border);
+    background-color: var(--bp-bg);
     transition: border-color 0.2s ease-out;
     &::after {
       content: '';
@@ -207,16 +200,14 @@ body:not(.home-redesign-off):has(.blueprint-home) {
       pointer-events: none;
       background: linear-gradient(
         225deg,
-        #070707 calc(50% - 0.6px),
-        var(--bp-border) calc(50% - 0.6px),
-        var(--bp-border) calc(50% + 0.6px),
+        var(--bp-bg) calc(50% - 0.6px),
+        var(--bp-field-border) calc(50% - 0.6px),
+        var(--bp-field-border) calc(50% + 0.6px),
         transparent calc(50% + 0.6px)
       );
-      transition: background 0.2s ease-out;
     }
     &:focus-within {
-      --bp-border: var(--bp-ink);
-      border-color: var(--bp-border);
+      --bp-field-border: var(--bp-ink);
     }
 
     .launch-bar {
@@ -237,6 +228,7 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     }
   }
 
+  // 候选词 / 搜索历史: 标签块平铺, 去掉逐行重复的图标
   .launch-bar-suggest-list {
     // 让出下方刻度尺与时钟那一行
     top: calc(100% + 36px);
@@ -244,25 +236,131 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     border: 1px solid var(--bp-faint);
     box-shadow: none;
     color: var(--bp-ink);
-    background-color: #0b0b0b;
+    background-color: var(--bp-bg);
+    white-space: normal;
     font-size: 13px;
+
+    .launch-bar-history-list,
+    .launch-bar-action-list {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 8px;
+      padding: 38px 14px 14px;
+      &::before {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        font-family: var(--bp-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        color: var(--bp-dim);
+      }
+    }
+    .launch-bar-history-list::before {
+      content: '02 — HISTORY';
+    }
+    .launch-bar-action-list::before {
+      content: '02 — SUGGEST';
+    }
+
+    .be-launch-bar-suggest-item {
+      position: relative;
+      max-width: 100%;
+      padding: 6px 11px !important;
+      border: 1px solid var(--bp-faint);
+      border-radius: 0 !important;
+      transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
+      &-content {
+        gap: 0;
+      }
+      &-icon,
+      &-description {
+        display: none;
+      }
+      &-title {
+        flex: none;
+        width: auto;
+      }
+      &-delete {
+        position: absolute;
+        top: -7px;
+        right: -7px;
+        width: 14px;
+        height: 14px;
+        margin: 0;
+        @include h-center();
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease-out;
+        justify-content: center;
+        color: var(--bp-bg);
+        background-color: var(--bp-dim);
+        .be-icon {
+          font-size: 10px !important;
+          width: 10px !important;
+          height: 10px !important;
+        }
+        &:hover {
+          background-color: var(--bp-ink);
+        }
+      }
+      &:not(.disabled):hover,
+      &:not(.disabled).focused,
+      &:not(.disabled):focus-within {
+        border-color: var(--bp-ink);
+        background-color: var(--bp-hover);
+      }
+      &:hover .be-launch-bar-suggest-item-delete {
+        opacity: 1;
+        pointer-events: initial;
+      }
+      &.disabled {
+        border: none;
+        padding: 0 !important;
+        color: var(--bp-dim);
+      }
+    }
+
+    // 历史列表最后一项是「清除搜索历史」, 放到标题行右侧
+    .launch-bar-history-list .be-launch-bar-suggest-item:last-child:not(.disabled) {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      padding: 2px 0 !important;
+      border: none;
+      background: none !important;
+      color: var(--bp-dim);
+      font-family: var(--bp-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      .be-launch-bar-suggest-item-name {
+        font-size: 0;
+        &::after {
+          content: 'CLEAR ×';
+          font-size: 11px;
+        }
+      }
+      &:hover {
+        color: var(--bp-ink);
+      }
+    }
+
     .suggest-highlight {
-      color: #fff;
+      color: inherit;
       text-decoration: underline 2px var(--bp-accent);
       text-underline-offset: 3px;
-    }
-    .be-launch-bar-suggest-item:not(.disabled).focused,
-    .be-launch-bar-suggest-item:not(.disabled):hover {
-      background-color: rgba(255, 255, 255, 0.06);
     }
   }
 
   .bp-sheet {
     position: absolute;
-    left: 32px;
-    right: 32px;
+    left: var(--bp-gutter);
+    right: var(--bp-gutter);
     bottom: 24px;
-    color: #4d4d4d;
+    color: var(--bp-dim);
+    opacity: 0.7;
   }
 
   .bp-in {
