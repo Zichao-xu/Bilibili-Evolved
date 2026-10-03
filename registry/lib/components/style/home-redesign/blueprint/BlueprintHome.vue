@@ -32,6 +32,7 @@
 import LaunchBar from '@/components/launch-bar/LaunchBar.vue'
 import { VIcon } from '@/ui'
 import HomeRedesignBase from '../HomeRedesignBase.vue'
+import { setupLongPressDelete } from './long-press-delete'
 
 const pad = (value: number) => value.toString().padStart(2, '0')
 const formatClock = (date: Date) =>
@@ -51,15 +52,18 @@ export default Vue.extend({
       clock: formatClock(now),
       revision: `${now.getFullYear()}.${pad(now.getMonth() + 1)}`,
       timer: 0,
+      disposeLongPress: (() => undefined) as () => void,
     }
   },
   mounted() {
     this.timer = window.setInterval(() => {
       this.clock = formatClock(new Date())
     }, 1000)
+    this.disposeLongPress = setupLongPressDelete(this.$el as HTMLElement)
   },
   beforeDestroy() {
     window.clearInterval(this.timer)
+    this.disposeLongPress()
   },
 })
 </script>
@@ -283,38 +287,43 @@ body:not(.home-redesign-off):has(.blueprint-home) {
         flex: none;
         width: auto;
       }
+      // 不显示删除按钮, 改为长按删除 (long-press-delete.ts)
       &-delete {
+        display: none !important;
+      }
+      user-select: none;
+      overflow: hidden;
+      // 长按进度: 底部墨线从左向右生长, 时长与 holdDuration 一致
+      &::after {
+        content: '';
         position: absolute;
-        top: -7px;
-        right: -7px;
-        width: 14px;
-        height: 14px;
-        margin: 0;
-        @include h-center();
-        opacity: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--bp-ink);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.18s ease-out;
         pointer-events: none;
-        transition: opacity 0.15s ease-out;
-        justify-content: center;
-        color: var(--bp-bg);
-        background-color: var(--bp-dim);
-        .be-icon {
-          font-size: 10px !important;
-          width: 10px !important;
-          height: 10px !important;
-        }
-        &:hover {
-          background-color: var(--bp-ink);
-        }
+      }
+      &.bp-holding::after {
+        transform: scaleX(1);
+        transition: transform 0.55s cubic-bezier(0.4, 0, 0.6, 1);
+      }
+      &.bp-holding {
+        border-color: var(--bp-ink);
+      }
+      // 退场: 加速收缩淡出
+      &.bp-removing {
+        pointer-events: none;
+        animation: bp-chip-exit 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
       }
       &:not(.disabled):hover,
       &:not(.disabled).focused,
       &:not(.disabled):focus-within {
         border-color: var(--bp-ink);
         background-color: var(--bp-hover);
-      }
-      &:hover .be-launch-bar-suggest-item-delete {
-        opacity: 1;
-        pointer-events: initial;
       }
       &.disabled {
         border: none;
@@ -338,7 +347,7 @@ body:not(.home-redesign-off):has(.blueprint-home) {
       .be-launch-bar-suggest-item-name {
         font-size: 0;
         &::after {
-          content: 'CLEAR ×';
+          content: 'CLEAR ALL';
           font-size: 11px;
         }
       }
@@ -372,6 +381,13 @@ body:not(.home-redesign-off):has(.blueprint-home) {
     .bp-in {
       animation: none;
     }
+  }
+}
+
+@keyframes bp-chip-exit {
+  to {
+    opacity: 0;
+    transform: scale(0.86);
   }
 }
 
