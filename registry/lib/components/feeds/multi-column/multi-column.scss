@@ -1,0 +1,14 @@
+// 动态首页的动态列表按行排成多列, 保持从左到右的时间顺序
+.bili-dyn-home--member .bili-dyn-list__items {
+  display: grid !important;
+  grid-template-columns: repeat(var(--be-feeds-column-count, 2), minmax(0, 1fr));
+  gap: 12px;
+  align-items: start;
+  > .bili-dyn-list__item {
+    min-width: 0;
+    margin: 0 !important;
+    > * {
+      margin: 0 !important;
+    }
+  }
+}
