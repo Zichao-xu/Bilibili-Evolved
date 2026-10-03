@@ -1,0 +1,17 @@
+// 首页顶栏: 去掉顶栏搜索框 (页面中央已有), 顶栏背景透明, 让网格透出
+body:not(.home-redesign-off) {
+  .custom-navbar [data-name='search'],
+  .bili-header .center-search-container {
+    visibility: hidden;
+  }
+  .custom-navbar {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+
+// 全页只留克莱因蓝一个强调色, 顶栏 Logo 改为灰白
+body:not(.home-redesign-off) .custom-navbar .custom-navbar-logo {
+  color: #d0d0d0 !important;
+  fill: #d0d0d0 !important;
+}
